@@ -20,16 +20,14 @@ Lab 8 kế thừa cách tổ chức repo của Lab 6 socket starter, nhưng thay
 
 ## Task division
 
-- **Thành viên 1 phụ trách chính**: Nghiên cứu cấu trúc mật mã lai, phát triển thư viện công cụ lõi, xử lý đệm PKCS#7 và đóng gói cấu trúc tiêu đề gói tin nhị phân mạng (`secure_transfer_utils.py`, `sender.py`).
-- **Thành viên 2 phụ trách chính**: Thiết lập kiến trúc Socket mạng TCP lắng nghe kết nối, xử lý bóc tách tiêu đề dòng dữ liệu byte nhận được và hoàn thiện kịch bản kiểm thử tự động (`receiver.py`, `tests/`).
-- **Phần làm chung**: Phân tích mô hình hiểm họa đường truyền (Threat Model), hoàn thiện báo cáo kỹ thuật Lab 8, thực hiện kiểm thử cục bộ và thu thập tệp nhật ký chứng minh.
+- **Tạ Công Sơn (Thành viên 1)**: Cài đặt và kiểm thử module mã hóa lai, tích hợp thuật toán DES-CBC, RSA-OAEP và hàm băm SHA-256 trong file `secure_transfer_utils.py`. Thiết kế kịch bản kiểm thử lỗi gói tin.
+- **Nguyễn Vũ Phương (Thành viên 2)**: Xây dựng và tối ưu hệ thống Socket TCP truyền gói tin an toàn giữa hai file `sender.py` và `receiver.py`, đồng bộ hóa việc đọc/ghi dữ liệu và ghi log minh chứng hệ thống.
 
 ## Demo roles
 
-- **Demo Sender / mã hóa / log gửi**: Thành viên 1 thực hiện cấu hình môi trường, khởi chạy Sender truyền tải dữ liệu an toàn và trích xuất tệp nhật ký `logs/sender_success.log`.
-- **Demo Receiver / giải mã / kiểm tra hash**: Thành viên 2 thiết lập cổng lắng nghe, khởi chạy Receiver giải mã gói tin nhị phân, xác thực tính toàn vẹn dữ liệu gốc và trích xuất tệp nhật ký `logs/receiver_success.log`.
-- **Cả hai cùng trả lời câu hỏi mở rộng AES và chữ ký số**: Cả hai thành viên cùng nghiên cứu, thảo luận chuyên sâu để đưa ra lời giải đáp toàn diện cho phần nâng cấp lên AES và tích hợp chữ ký số bảo vệ hệ thống.
-
+- **Demo Sender / mã hóa dữ liệu**: Tạ Công Sơn
+- **Demo Receiver / giải mã dữ liệu**: Nguyễn Vũ Phương
+- **Trả lời câu hỏi lý thuyết**: Cả hai thành viên cùng phối hợp thực hiện.
 ---
 
 ## Mục tiêu học tập
@@ -241,15 +239,43 @@ CI sẽ kiểm tra:
 
 ### Q1. Thay DES bằng AES
 
-Khi thực hiện nâng cấp hệ thống bảo mật lõi từ thuật toán cũ DES lên tiêu chuẩn mã hóa tiên tiến AES:
-- **AES-128 dùng key bao nhiêu byte?** Độ dài khóa phiên yêu cầu dài đúng **16 byte** (tương đương 128 bit).
-- **AES-256 dùng key bao nhiêu byte?** Độ dài khóa phiên yêu cầu dài đúng **32 byte** (tương đương 256 bit).
-- **Nếu dùng AES-CBC, IV dài bao nhiêu byte?** Do kích thước khối (Block size) của thuật toán AES luôn cố định là 128 bit, Vectơ khởi tạo (IV) bắt buộc phải dài đúng **16 byte** (không phụ thuộc vào việc sử dụng khóa AES-128 hay AES-256).
-- **Nếu dùng AES-GCM, vì sao GCM có thể giải quyết cả mã hóa và xác thực dữ liệu tốt hơn CBC + hash rời rạc?** Chế độ AES-GCM thuộc nhóm thuật toán mã hóa đi kèm xác thực (AEAD - Authenticated Encryption with Associated Data). Thay vì hệ thống phải chạy hai tiến trình độc lập, tốn tài nguyên xử lý (mã hóa khối CBC rồi tính băm SHA-256 thô bên ngoài), AES-GCM tích hợp sẵn việc sinh Thẻ xác thực toán học (Authentication Tag - GMAC) song song trực tiếp trong quá trình mã hóa khối. Cơ chế này không những tăng tối đa hiệu năng tính toán ở tầng phần cứng mà còn triệt tiêu hoàn toàn nguy cơ bị tấn công thay đổi bit bản mã (Bit-flipping attacks). Receiver có thể kiểm tra tính toàn vẹn và xác thực nguồn gốc ngay trên dữ liệu bản mã nhận được; nếu thẻ Tag sai lệch, hệ thống lập tức từ chối gói tin mà không cần mất tài nguyên giải mã thô dữ liệu lỗi như mô hình CBC kết hợp băm rời rạc.
+DES có key hiệu dụng nhỏ nên không còn phù hợp cho hệ thống thật. Khi nâng cấp lên AES, sinh viên cần trả lời:
+
+- AES-128 dùng key bao nhiêu byte?
+- AES-256 dùng key bao nhiêu byte?
+- Nếu dùng AES-CBC, IV dài bao nhiêu byte?
+- Nếu dùng AES-GCM, vì sao GCM có thể giải quyết cả mã hóa và xác thực dữ liệu tốt hơn CBC + hash rời rạc?
 
 ### Q2. Thêm chữ ký số
 
-Mô hình mật mã lai hiện tại của bài Lab mới chỉ giúp Receiver tiếp nhận khóa một cách bí mật thông qua khóa công khai cá nhân, nhưng bản thân Receiver hoàn toàn không có cơ sở chứng minh nguồn gốc gói tin (vấn đề Sender ẩn danh). Hướng mở rộng tích hợp Chữ ký số để giải quyết lỗ hổng bảo mật này được thực hiện như sau:
-- **Trang bị khóa:** Người gửi (Sender) sẽ được phân phối hoặc tự khởi tạo một cặp khóa RSA độc lập của riêng mình (Khóa riêng của Sender và Khóa công khai của Sender). Khóa công khai của Sender sẽ được công bố trước hoặc gửi an toàn cho Receiver.
-- **Tiến hành ký tại Sender:** Người gửi sau khi đóng gói toàn bộ chuỗi trường nhị phân quan trọng bao gồm: `encrypted_des_key + ciphertext + sha256_hash`, sẽ tiến hành băm chuỗi này, sau đó mã hóa chuỗi băm bằng chính **Khóa riêng (Private Key) của Sender** để tạo thành Chữ ký số (Digital Signature) rồi gắn kèm vào cuối cấu trúc gói tin.
-- **Xác minh chữ ký tại Receiver:** Trình nhận (Receiver) sau khi tiếp nhận dòng byte qua socket
+Phiên bản hiện tại giúp Receiver lấy được DES key một cách bí mật, nhưng chưa chứng minh Sender là ai. Hướng mở rộng:
+
+- Sender có cặp khóa RSA riêng.
+- Sender ký lên hash của `encrypted_des_key + ciphertext + sha256_hash` bằng private key của Sender.
+- Receiver xác minh chữ ký bằng public key của Sender.
+- Nếu verify thành công, Receiver có thêm bằng chứng về nguồn gửi và tính toàn vẹn của các thành phần quan trọng.
+
+---
+
+## Ethics & Safe use
+
+- Chỉ chạy demo trên máy cá nhân, VM hoặc mạng nội bộ phục vụ học tập.
+- Không quét cổng hoặc thử nghiệm trên hệ thống không được phép.
+- Không dùng dữ liệu cá nhân thật hoặc dữ liệu nhạy cảm để demo.
+- Không commit private key thật lên GitHub.
+- Không trình bày hệ thống DES-CBC này như một giải pháp an toàn sẵn sàng triển khai thực tế.
+- Nếu tham khảo code/tài liệu, hãy ghi nguồn rõ ràng.
+
+---
+
+## Bài học chính
+
+Một hệ thống truyền dữ liệu an toàn không chỉ cần mã hóa nội dung.
+
+Lab 8 cho thấy cần phối hợp nhiều lớp bảo vệ:
+
+```text
+DES-CBC che nội dung
+SHA-256 kiểm tra dữ liệu có bị thay đổi không
+RSA-OAEP bảo vệ khóa DES khi truyền qua mạng
+```
