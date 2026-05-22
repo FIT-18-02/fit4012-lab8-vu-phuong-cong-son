@@ -1,0 +1,5 @@
+[*] Receiver đang lắng nghe tại 127.0.0.1:6000
+[+] Dữ liệu nguyên vẹn: SHA-256 khớp.
+[+] Đã giải mã DES key bằng RSA private key của receiver.
+[+] Đã giải mã bản tin bằng DES-CBC.
+[+] Bản tin gốc: Xin chao FIT4012 - Lab 8 Secure Transfer

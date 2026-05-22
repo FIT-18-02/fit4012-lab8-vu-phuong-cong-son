@@ -1,0 +1,13 @@
+[+] Đã tính SHA-256 của bản tin gốc.
+[+] Đã sinh DES key và IV ngẫu nhiên.
+[+] Đã mã hóa bản tin bằng DES-CBC.
+[+] Đã mã hóa DES key bằng RSA public key của receiver.
+[+] Đã gửi gói dữ liệu an toàn qua socket.
+Server: 127.0.0.1
+Data port: 6000
+Receiver public key: keys/receiver_public.pem
+Plaintext length: 40 bytes
+DES key length: 8 bytes
+Encrypted DES key length: 256 bytes
+Ciphertext length including IV: 56 bytes
+SHA-256: 57169f0b26c96d1811c54fcddaf9df1ebb0d535fec22aa7f0e391dd034083802
