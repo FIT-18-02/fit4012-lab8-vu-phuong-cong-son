@@ -230,3 +230,4 @@ def recv_secure_packet(conn) -> bytes:
 
     plaintext_hash = recv_exact(conn, SHA256_DIGEST_SIZE)
     return enc_key_len_header + encrypted_des_key + cipher_len_header + ciphertext_with_iv + plaintext_hash
+# v1.0.2 - force update
